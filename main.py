@@ -20,17 +20,47 @@ config = {
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.camera import Camera
+import pyrebase
+import pyqrcode
+import cv2
+from kivy.utils import platform
+
+# Firebase configuration
+config = {
+    "apiKey": "YOUR_API_KEY",
+    "authDomain": "YOUR_AUTH_DOMAIN",
+    "databaseURL": "YOUR_DATABASE_URL",
+    "storageBucket": "YOUR_STORAGE_BUCKET"
+}
+
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
+
+
 class BarcodeScannerApp(App):
     def build(self):
         self.layout = BoxLayout(orientation='vertical', padding=10)
         self.layout.add_widget(Label(text="Scan a Barcode", size_hint_y=None, height=30))
-        
+
         # Request camera permission on Android
+        if platform == 'android':
+            from android.permissions import request_permission, Permission
+            request_permission(Permission.CAMERA)
+
         self.camera = Camera(resolution=(640, 480), play=True)
         self.layout.add_widget(self.camera)
         self.camera.bind(on_tex=self.capture_and_process_barcode)
-        
+
         return self.layout
+
+    # Rest of your code...
 
     def on_start(self):
         # Request camera permission on Android when the app starts
@@ -41,7 +71,7 @@ class BarcodeScannerApp(App):
     def capture_and_process_barcode(self, instance, texture):
         # Capture a frame from the camera when the camera texture is updated
         texture.save("barcode.png")
-        
+
         # Use OpenCV to read the barcode
         barcode_image = cv2.imread("barcode.png")
         barcode_detector = cv2.QRCodeDetector()
@@ -70,7 +100,8 @@ class BarcodeScannerApp(App):
         popup_layout.add_widget(price_input)
         popup_layout.add_widget(stock_input)
         popup_layout.add_widget(submit_button)
-        self.product_info_popup = Popup(title="Product Information", content=popup_layout, size_hint=(None, None), size=(400, 300))
+        self.product_info_popup = Popup(title="Product Information", content=popup_layout, size_hint=(None, None),
+                                        size=(400, 300))
         self.product_info_popup.open()
 
     def submit_product_info(self, barcode, product_name, model, price, stock):
@@ -108,6 +139,7 @@ class BarcodeScannerApp(App):
 
     def dismiss_popup(self, instance):
         self.popup.dismiss()
+
 
 if __name__ == '__main__':
     BarcodeScannerApp().run()
