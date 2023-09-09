@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.7.6,hostpython3==3.7.6,kivy,pillow,pycryptodome,pyrebase4,opencv-python,pyqrcode
+requirements = python3==3.7.6,hostpython3==3.7.6,kivy,pillow,pycryptodome,pyrebase,opencv-python,pyqrcode,cdrom
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
