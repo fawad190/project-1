@@ -11,30 +11,37 @@ import cv2
 
 # Firebase configuration
 config = {
-    "apiKey": "AIzaSyAdQ9qf38X4CSK4M3A7B-75Pi_hoaroIVo",
-    "authDomain": "hamobile-ef703.firebaseapp.com",
-    "databaseURL": "https://hamobile-ef703-default-rtdb.firebaseio.com",
-    "storageBucket": "hamobile-ef703.appspot.com"
+    "apiKey": "YOUR_API_KEY",
+    "authDomain": "YOUR_AUTH_DOMAIN",
+    "databaseURL": "YOUR_DATABASE_URL",
+    "storageBucket": "YOUR_STORAGE_BUCKET"
 }
 
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 
-
 class BarcodeScannerApp(App):
     def build(self):
         self.layout = BoxLayout(orientation='vertical', padding=10)
         self.layout.add_widget(Label(text="Scan a Barcode", size_hint_y=None, height=30))
+        
+        # Request camera permission on Android
         self.camera = Camera(resolution=(640, 480), play=True)
         self.layout.add_widget(self.camera)
-        self.camera.bind(
-            on_tex=self.capture_and_process_barcode)  # Automatically capture when camera texture is updated
+        self.camera.bind(on_tex=self.capture_and_process_barcode)
+        
         return self.layout
+
+    def on_start(self):
+        # Request camera permission on Android when the app starts
+        if platform == 'android':
+            from android.permissions import request_permission, Permission
+            request_permission(Permission.CAMERA)
 
     def capture_and_process_barcode(self, instance, texture):
         # Capture a frame from the camera when the camera texture is updated
         texture.save("barcode.png")
-
+        
         # Use OpenCV to read the barcode
         barcode_image = cv2.imread("barcode.png")
         barcode_detector = cv2.QRCodeDetector()
@@ -63,8 +70,7 @@ class BarcodeScannerApp(App):
         popup_layout.add_widget(price_input)
         popup_layout.add_widget(stock_input)
         popup_layout.add_widget(submit_button)
-        self.product_info_popup = Popup(title="Product Information", content=popup_layout, size_hint=(None, None),
-                                        size=(400, 300))
+        self.product_info_popup = Popup(title="Product Information", content=popup_layout, size_hint=(None, None), size=(400, 300))
         self.product_info_popup.open()
 
     def submit_product_info(self, barcode, product_name, model, price, stock):
@@ -102,7 +108,6 @@ class BarcodeScannerApp(App):
 
     def dismiss_popup(self, instance):
         self.popup.dismiss()
-
 
 if __name__ == '__main__':
     BarcodeScannerApp().run()
